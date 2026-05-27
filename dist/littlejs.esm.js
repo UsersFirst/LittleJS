@@ -5848,7 +5848,7 @@ function inputInit()
                         if (t.identifier === touchGamepadStickTouchId) { stickTouch = t; break; }
                 if (!stickTouch)
                 {
-                    touchGamepadStickTouchId = touchGamepadStickAnchor = undefined;
+                    touchGamepadStickTouchId = undefined;
                     for (const t of e.touches)
                     {
                         // claim the first touch in the lower-left quadrant
@@ -6166,23 +6166,34 @@ function inputRender()
         context.fill();
         context.stroke();
 
-        // draw right face buttons
+        // draw right side: virtual analog stick if buttonCount===1, face buttons otherwise
         {
             const buttonCenter = touchGamepadButtonCenter();
-            const buttonSize = touchGamepadButtonCount > 1 ? 
-                touchGamepadSize/4 : touchGamepadSize/2;
-            for (let i=0; i<touchGamepadButtonCount; i++)
+            if (touchGamepadButtonCount === 1)
+            {
+                // virtual right analog stick: ring + thumb dot, matching left stick
+                const rightTouchStick = touchGamepadSticks[1] ?? vec2();
+                context.beginPath();
+                context.arc(buttonCenter.x, buttonCenter.y, touchGamepadSize/2, 0, 9);
+                context.stroke();
+                const rightThumb = buttonCenter.add(rightTouchStick.scale(touchGamepadSize/2));
+                context.fillStyle = '#fff';
+                context.beginPath();
+                context.arc(rightThumb.x, rightThumb.y, touchGamepadSize/4, 0, 9);
+                context.fill();
+                context.stroke();
+            }
+            else for (let i=0; i<touchGamepadButtonCount; i++)
             {
                 const j = mod(i-1, 4);
-                let button = touchGamepadButtonCount > 2 ? 
+                let button = touchGamepadButtonCount > 2 ?
                     j : min(j, touchGamepadButtonCount-1);
                 // fix button locations (swap 2 and 3 to match gamepad layout)
                 button = button === 3 ? 2 : button === 2 ? 3 : button;
-                const pos = touchGamepadButtonCount < 2 ? buttonCenter :
-                    buttonCenter.add(vec2().setDirection(j, touchGamepadSize/2));
+                const pos = buttonCenter.add(vec2().setDirection(j, touchGamepadSize/2));
                 context.fillStyle = touchGamepadButtons[button] ? '#fff' : '#000';
                 context.beginPath();
-                context.arc(pos.x, pos.y, buttonSize, 0,9);
+                context.arc(pos.x, pos.y, touchGamepadSize/4, 0,9);
                 context.fill();
                 context.stroke();
             }
