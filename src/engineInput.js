@@ -552,7 +552,7 @@ function inputInit()
                         if (t.identifier === touchGamepadStickTouchId) { stickTouch = t; break; }
                 if (!stickTouch)
                 {
-                    touchGamepadStickTouchId = touchGamepadStickAnchor = undefined;
+                    touchGamepadStickTouchId = undefined;
                     for (const t of e.touches)
                     {
                         // claim the first touch in the lower-left quadrant
