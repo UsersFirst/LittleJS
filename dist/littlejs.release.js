@@ -5451,6 +5451,16 @@ function inputRender()
         const stickCenter = touchGamepadFloating && touchGamepadStickAnchor ?
             touchGamepadStickAnchor :
             vec2(touchGamepadSize, mainCanvasSize.y-touchGamepadSize);
+
+        // floating zone halo: shows the soft touch area in floating mode
+        if (touchGamepadFloating)
+        {
+            context.fillStyle = 'rgba(255,255,255,.12)';
+            context.beginPath();
+            context.arc(stickCenter.x, stickCenter.y, touchGamepadSize, 0, 9);
+            context.fill();
+        }
+
         context.beginPath();
         if (touchGamepadAnalog)
         {
