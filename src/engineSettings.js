@@ -290,12 +290,6 @@ let touchGamepadAlpha = .3;
  *  @memberof Settings */
 let touchGamepadDisplayTime = 3;
 
-/** True for a stick that anchors at the first touch in the lower-left quadrant
- *  @type {boolean}
- *  @default
- *  @memberof Settings */
-let touchGamepadFloating = false;
-
 /** Allow vibration hardware if it exists
  *  @type {boolean}
  *  @default
@@ -560,10 +554,6 @@ function setTouchGamepadAlpha(alpha) { touchGamepadAlpha = alpha; }
  *  @memberof Settings */
 function setTouchGamepadDisplayTime(time) { touchGamepadDisplayTime = time; }
 
-/** Set if touch gamepad should use a floating stick (anchored at first touch)
- *  @param {boolean} enable
- *  @memberof Settings */
-function setTouchGamepadFloating(enable) { touchGamepadFloating = enable; }
 
 /** Set to allow vibration hardware if it exists
  *  @param {boolean} enable
