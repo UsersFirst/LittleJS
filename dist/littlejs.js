@@ -3021,12 +3021,6 @@ let touchGamepadAlpha = .3;
  *  @memberof Settings */
 let touchGamepadDisplayTime = 3;
 
-/** True for a stick that anchors at the first touch in the lower-left quadrant
- *  @type {boolean}
- *  @default
- *  @memberof Settings */
-let touchGamepadFloating = false;
-
 /** Allow vibration hardware if it exists
  *  @type {boolean}
  *  @default
@@ -3291,10 +3285,6 @@ function setTouchGamepadAlpha(alpha) { touchGamepadAlpha = alpha; }
  *  @memberof Settings */
 function setTouchGamepadDisplayTime(time) { touchGamepadDisplayTime = time; }
 
-/** Set if touch gamepad should use a floating stick (anchored at first touch)
- *  @param {boolean} enable
- *  @memberof Settings */
-function setTouchGamepadFloating(enable) { touchGamepadFloating = enable; }
 
 /** Set to allow vibration hardware if it exists
  *  @param {boolean} enable
@@ -5628,7 +5618,6 @@ const gamepadStickData = [], gamepadDpadData = [], gamepadHadInput = [];
 
 // touch gamepad internal variables
 const touchGamepadTimer = new Timer, touchGamepadButtons = [], touchGamepadSticks = [];
-let touchGamepadStickAnchor, touchGamepadStickTouchId;
 
 ///////////////////////////////////////////////////////////////////////////////
 // Input system functions used by engine
@@ -5834,44 +5823,15 @@ function inputInit()
             if (paused) return;
 
             // get center of left and right sides
-            let stickCenter = vec2(touchGamepadSize, mainCanvasSize.y-touchGamepadSize);
+            const stickCenter = vec2(touchGamepadSize, mainCanvasSize.y-touchGamepadSize);
             const buttonCenter = touchGamepadButtonCenter();
             const startCenter = mainCanvasSize.scale(.5);
-
-            // floating stick: anchor at the first touch in the lower-left quadrant
-            // and follow its identifier so the input is not lost if the finger drifts
-            if (touchGamepadFloating)
-            {
-                let stickTouch;
-                if (touchGamepadStickTouchId !== undefined)
-                    for (const t of e.touches)
-                        if (t.identifier === touchGamepadStickTouchId) { stickTouch = t; break; }
-                if (!stickTouch)
-                {
-                    touchGamepadStickTouchId = undefined;
-                    for (const t of e.touches)
-                    {
-                        // claim the first touch in the lower-left quadrant
-                        const p = mouseEventToScreen(vec2(t.clientX, t.clientY));
-                        if (p.x < mainCanvasSize.x/2 && p.y > mainCanvasSize.y/2)
-                        {
-                            touchGamepadStickTouchId = t.identifier;
-                            touchGamepadStickAnchor = p;
-                            break;
-                        }
-                    }
-                }
-                if (touchGamepadStickAnchor)
-                    stickCenter = touchGamepadStickAnchor;
-            }
 
             // check each touch point
             for (const touch of e.touches)
             {
                 const touchPos = mouseEventToScreen(vec2(touch.clientX, touch.clientY));
-                const isStickTouch = touchGamepadFloating ?
-                    touch.identifier === touchGamepadStickTouchId :
-                    touchPos.x < mainCanvasSize.x/2 &&
+                const isStickTouch = touchPos.x < mainCanvasSize.x/2 &&
                     stickCenter.distance(touchPos) < touchGamepadSize*2;
                 if (isStickTouch)
                 {
@@ -5960,9 +5920,7 @@ function inputUpdate()
         {
             if (debugGamepads)
             {
-                const stickCenter = touchGamepadFloating && touchGamepadStickAnchor ?
-                    touchGamepadStickAnchor :
-                    vec2(touchGamepadSize, mainCanvasSize.y-touchGamepadSize);
+                const stickCenter = vec2(touchGamepadSize, mainCanvasSize.y-touchGamepadSize);
                 const buttonCenter = touchGamepadButtonCenter();
                 const startCenter = mainCanvasSize.scale(.5);
 
@@ -6127,9 +6085,7 @@ function inputRender()
 
         // draw left analog stick
         const leftTouchStick = touchGamepadSticks[0] ?? vec2();
-        const stickCenter = touchGamepadFloating && touchGamepadStickAnchor ?
-            touchGamepadStickAnchor :
-            vec2(touchGamepadSize, mainCanvasSize.y-touchGamepadSize);
+        const stickCenter = vec2(touchGamepadSize, mainCanvasSize.y-touchGamepadSize);
 
         // soft touch zone: shows the wide hit region around the stick/dpad
         if (!touchGamepadAnalog)
