@@ -290,6 +290,15 @@ let touchGamepadAlpha = .3;
  *  @memberof Settings */
 let touchGamepadDisplayTime = 3;
 
+/** True to use a floating stick that anchors where the user first touches in the
+ *  lower-left quadrant instead of the fixed bottom-left position
+ *  - Tracks the touch identifier, so the stick is not lost if the finger drifts
+ *  - Draws a visible thumb that follows the finger (clamped to touchGamepadSize/2)
+ *  @type {boolean}
+ *  @default
+ *  @memberof Settings */
+let touchGamepadFloating = false;
+
 /** Allow vibration hardware if it exists
  *  @type {boolean}
  *  @default
@@ -553,6 +562,12 @@ function setTouchGamepadAlpha(alpha) { touchGamepadAlpha = alpha; }
  *  @param {number} time
  *  @memberof Settings */
 function setTouchGamepadDisplayTime(time) { touchGamepadDisplayTime = time; }
+
+/** Set if touch gamepad should use a floating stick that anchors at first touch
+ *  in the lower-left quadrant (better mobile UX)
+ *  @param {boolean} enable
+ *  @memberof Settings */
+function setTouchGamepadFloating(enable) { touchGamepadFloating = enable; }
 
 /** Set to allow vibration hardware if it exists
  *  @param {boolean} enable
