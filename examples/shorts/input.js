@@ -1,6 +1,7 @@
 function gameUpdate()
 {
     touchGamepadEnable = 1;
+    touchGamepadFloating = 1;
     if (isTouchDevice || isUsingGamepad)
     {
         if (isTouchDevice)
