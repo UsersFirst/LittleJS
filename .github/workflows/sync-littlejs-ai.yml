@@ -1,0 +1,70 @@
+name: Sync dist to LittleJS-AI
+
+# Pushes the LittleJS dist bundles into usersfirst/LittleJS-AI so the
+# deployed Pages site (littlejs.usersfirst.games) picks up engine changes
+# without a manual copy.
+#
+# Requires a fine-grained PAT stored as LITTLEJS_AI_PAT on this repo:
+#   - Repository access: usersfirst/LittleJS-AI
+#   - Repository permissions: Contents = Read and write
+#
+# Manual: Actions tab -> "Sync dist to LittleJS-AI" -> Run workflow.
+# Auto: any push to main that changes dist/littlejs* triggers it.
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_branch:
+        description: Branch on usersfirst/LittleJS-AI to push to
+        type: string
+        default: main
+  push:
+    branches: [main]
+    paths:
+      - 'dist/littlejs*'
+
+permissions:
+  contents: read
+
+jobs:
+  sync:
+    if: github.repository == 'usersfirst/littlejs'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout usersfirst/littlejs
+        uses: actions/checkout@v4
+        with:
+          path: littlejs
+
+      - name: Checkout usersfirst/LittleJS-AI
+        uses: actions/checkout@v4
+        with:
+          repository: usersfirst/LittleJS-AI
+          path: littlejs-ai
+          ref: ${{ inputs.target_branch || 'main' }}
+          token: ${{ secrets.LITTLEJS_AI_PAT }}
+
+      - name: Copy dist bundles
+        run: |
+          set -e
+          mkdir -p littlejs-ai/dist
+          for f in littlejs.js littlejs.release.js littlejs.min.js \
+                   littlejs.esm.js littlejs.esm.min.js littlejs.d.ts; do
+            cp "littlejs/dist/$f" "littlejs-ai/dist/$f"
+          done
+
+      - name: Commit and push if changed
+        working-directory: littlejs-ai
+        run: |
+          set -e
+          git config user.name "littlejs-sync[bot]"
+          git config user.email "littlejs-sync@users.noreply.github.com"
+          git add dist/littlejs.js dist/littlejs.release.js dist/littlejs.min.js \
+                  dist/littlejs.esm.js dist/littlejs.esm.min.js dist/littlejs.d.ts
+          if git diff --cached --quiet; then
+            echo "No dist changes to sync."
+            exit 0
+          fi
+          SOURCE_SHA=$(cd ../littlejs && git rev-parse --short HEAD)
+          git commit -m "sync dist from usersfirst/littlejs@${SOURCE_SHA}"
+          git push
