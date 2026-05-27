@@ -555,11 +555,9 @@ function inputInit()
                     touchGamepadStickTouchId = touchGamepadStickAnchor = undefined;
                     for (const t of e.touches)
                     {
+                        // claim the first touch in the lower-left quadrant
                         const p = mouseEventToScreen(vec2(t.clientX, t.clientY));
-                        // claim the first touch in the lower-left quadrant that
-                        // is not already on the face buttons
-                        if (p.x < mainCanvasSize.x/2 && p.y > mainCanvasSize.y/2 &&
-                            buttonCenter.distance(p) >= touchGamepadSize)
+                        if (p.x < mainCanvasSize.x/2 && p.y > mainCanvasSize.y/2)
                         {
                             touchGamepadStickTouchId = t.identifier;
                             touchGamepadStickAnchor = p;
@@ -832,44 +830,38 @@ function inputRender()
 
         // draw left analog stick
         const leftTouchStick = touchGamepadSticks[0] ?? vec2();
-        const floatingAnchored = touchGamepadFloating && touchGamepadStickAnchor;
-        const stickCenter = floatingAnchored ? touchGamepadStickAnchor :
+        const stickCenter = touchGamepadFloating && touchGamepadStickAnchor ?
+            touchGamepadStickAnchor :
             vec2(touchGamepadSize, mainCanvasSize.y-touchGamepadSize);
-        if (floatingAnchored)
+        context.fillStyle = leftTouchStick.lengthSquared() > 0 ? '#fff' : '#000';
+        context.beginPath();
+        if (touchGamepadFloating)
         {
-            // hollow base ring at the anchor + filled thumb that follows the finger
+            // hollow ring + thumb circle that follows the finger
+            const thumb = stickCenter.add(leftTouchStick.scale(touchGamepadSize/2));
+            context.arc(thumb.x, thumb.y, touchGamepadSize/4, 0, 9);
+            context.fill();
             context.beginPath();
             context.arc(stickCenter.x, stickCenter.y, touchGamepadSize/2, 0, 9);
-            context.stroke();
-            const thumbPos = stickCenter.add(leftTouchStick.scale(touchGamepadSize/2));
-            context.fillStyle = '#fff';
-            context.beginPath();
-            context.arc(thumbPos.x, thumbPos.y, touchGamepadSize/4, 0, 9);
+        }
+        else if (touchGamepadAnalog)
+        {
+            // draw circle shaped gamepad
+            context.arc(stickCenter.x, stickCenter.y, touchGamepadSize/2, 0, 9);
             context.fill();
-            context.stroke();
         }
         else
         {
-            context.fillStyle = leftTouchStick.lengthSquared() > 0 ? '#fff' : '#000';
-            context.beginPath();
-            if (touchGamepadAnalog)
+            // draw cross shaped gamepad
+            for (let i=10; --i;)
             {
-                // draw circle shaped gamepad
-                context.arc(stickCenter.x, stickCenter.y, touchGamepadSize/2, 0, 9);
-            }
-            else
-            {
-                // draw cross shaped gamepad
-                for (let i=10; --i;)
-                {
-                    const angle = i*PI/4;
-                    context.arc(stickCenter.x, stickCenter.y,touchGamepadSize*.6, angle + PI/8, angle + PI/8);
-                    i%2 && context.arc(stickCenter.x, stickCenter.y, touchGamepadSize*.33, angle, angle);
-                }
+                const angle = i*PI/4;
+                context.arc(stickCenter.x, stickCenter.y,touchGamepadSize*.6, angle + PI/8, angle + PI/8);
+                i%2 && context.arc(stickCenter.x, stickCenter.y, touchGamepadSize*.33, angle, angle);
             }
             context.fill();
-            context.stroke();
         }
+        context.stroke();
 
         // draw right face buttons
         {
