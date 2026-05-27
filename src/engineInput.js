@@ -575,7 +575,8 @@ function inputInit()
                 const touchPos = mouseEventToScreen(vec2(touch.clientX, touch.clientY));
                 const isStickTouch = touchGamepadFloating ?
                     touch.identifier === touchGamepadStickTouchId :
-                    stickCenter.distance(touchPos) < touchGamepadSize;
+                    touchPos.x < mainCanvasSize.x/2 &&
+                    stickCenter.distance(touchPos) < touchGamepadSize*2;
                 if (isStickTouch)
                 {
                     // virtual analog stick
@@ -834,12 +835,12 @@ function inputRender()
             touchGamepadStickAnchor :
             vec2(touchGamepadSize, mainCanvasSize.y-touchGamepadSize);
 
-        // floating zone halo: shows the soft touch area in floating mode
-        if (touchGamepadFloating)
+        // soft touch zone: shows the wide hit region around the stick/dpad
+        if (!touchGamepadAnalog)
         {
             context.fillStyle = 'rgba(255,255,255,.12)';
             context.beginPath();
-            context.arc(stickCenter.x, stickCenter.y, touchGamepadSize, 0, 9);
+            context.arc(stickCenter.x, stickCenter.y, touchGamepadSize*2, 0, 9);
             context.fill();
         }
 
