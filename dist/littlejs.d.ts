@@ -549,6 +549,11 @@ declare module "littlejsengine" {
      *  @default
      *  @memberof Settings */
     export let touchGamepadDisplayTime: number;
+    /** True for a stick that anchors at the first touch in the lower-left quadrant
+     *  @type {boolean}
+     *  @default
+     *  @memberof Settings */
+    export let touchGamepadFloating: boolean;
     /** Allow vibration hardware if it exists
      *  @type {boolean}
      *  @default
@@ -744,6 +749,10 @@ declare module "littlejsengine" {
      *  @param {number} time
      *  @memberof Settings */
     export function setTouchGamepadDisplayTime(time: number): void;
+    /** Set if touch gamepad should use a floating stick (anchored at first touch)
+     *  @param {boolean} enable
+     *  @memberof Settings */
+    export function setTouchGamepadFloating(enable: boolean): void;
     /** Set to allow vibration hardware if it exists
      *  @param {boolean} enable
      *  @memberof Settings */
